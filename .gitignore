@@ -1,1 +1,5 @@
+*.deb
+*.pyc
+get-pip.py
+*.png
 chromedriver*
