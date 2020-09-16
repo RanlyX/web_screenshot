@@ -6,40 +6,56 @@ import sys
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
-def fixed_url(url):
-    fixed_url = re.sub("^hxxp", "http", url)
-    return fixed_url
+# Text color define
+T_LIGHT_RED = "\033[1;31m"
+NORMAL = "\033[m" 
 
+# Some phish url will be report "hxxp" or "hxxps"
+def refinedURL(url):
+    refined = re.sub("^hxxp", "http", url)
+    return refined
+
+# Setting browser arguments
+def initBrowser():
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument('window-size=1200x600')
+    return chrome_options
+
+# It will print red text
+def printRedStr(str_):
+    sys.stdout.write(T_LIGHT_RED)
+    print(str_)
+    sys.stdout.write(NORMAL)
+
+# Some phish url will be report "hxxp" or "hxxps"
 def shot(browser, url, name):
     if(browser):
         browser.get(url)
         try:
             print browser.switch_to.alert.text
             browser.switch_to.alert.accept()
-        except: 
+        except:
             print("no alert")
         browser.get_screenshot_as_file(name+'.png')
     else:
-        sys.stdout.write(T_LIGHT_RED)
-        print("Browser isn't set!")
-        sys.stdout.write(NORMAL)
+        printStr("Browser isn't set!")
 
 if __name__ == '__main__':
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument('window-size=1200x600')
-    browser = webdriver.Chrome(chrome_options=chrome_options, executable_path='/home/ranly/chromedriver')
-    
-    # print(r)
-    # browser.set_page_load_timeout(30)
-    # browser.set_script_timeout(30)
-        # run(result[1], result[0])
+    # Set browser
+    chrome_options = initBrowser()
+    browser = webdriver.Chrome(chrome_options=chrome_options, )
+
+    # If need time out
+    # browser.set_page_load_timeout(600)
+    # browser.set_script_timeout(600)
+
     url = sys.argv[1]
     name = sys.argv[2]
     print(url, name)
-        # try:
-    shot(browser, url, name)
-        # except:
-            # print'failed.'
+    try:
+        shot(browser, url, name)
+    except:
+        print("Shot fail!")
     browser.quit()
