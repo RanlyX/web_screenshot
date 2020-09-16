@@ -45,7 +45,7 @@ def shot(browser, url, name):
 def main():
     # Set browser
     chrome_options = initBrowser()
-    browser = webdriver.Chrome(executable_path=r"./chromedriver.exe", chrome_options=chrome_options)
+    browser = webdriver.Chrome(executable_path=r"./chromedriver", chrome_options=chrome_options)
 
     # If need time out
     # browser.set_page_load_timeout(600)
