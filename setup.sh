@@ -1,13 +1,21 @@
 #!/bin/bash
 
+# new echo (print)
+print() {
+    local str=$1
+    echo -e $str>&2
+}
+
 # print install message.
 echoInstallMsg() {
     local commandName=$1
     local msg=$2
     if [ ${#commandName} -lt 8 ]; then
-        echo -e $commandName'\t\t'$msg>&2
+        fullMsg=$commandName'\t\t'$msg
+        print $fullMsg
     else
-        echo -e $commandName'\t'$msg>&2
+        fullMsg=$commandName'\t'$msg>&2
+        print $fullMsg
     fi
 }
 
@@ -34,10 +42,10 @@ getSystemVersion() {
     local a=$(uname -m)
     if [ $a == i686 ]; then 
         b=32; 
-        echo "This system is 32 bits."
+        print "This system is 32 bits."
     elif [ $a == x86_64 ]; then 
         b=64; 
-        echo "This system is 64 bits."
+        print "This system is 64 bits."
     fi
     return $b
 }
@@ -46,7 +54,7 @@ getSystemVersion() {
 getChromeVersion() {
     v=$(google-chrome --version | sed "s/Google Chrome //g" | sed "s/\..*//g")
     ver=$((v)) # chrome version
-    echo "Google Chrome version: "$v>&2
+    print "Google Chrome version: "$v
     return $ver
 }
 
@@ -54,6 +62,7 @@ getChromeVersion() {
 getCDVersion() {
     getChromeVersion
     local ver=$?
+
     # Set chromedriver version
     if [ $ver -le 70 ] && [ $ver -ge 68 ]; then
         currentVersion="2.42"
@@ -108,9 +117,8 @@ getCDVersion() {
     elif [ $ver == 85 ]; then
         currentVersion="85.0.4183.87"
     else
-        currentVersion=$ver
-        echo 'Unknown version '$ver', please go to http://chromedriver.storage.googleapis.com/ download manual.'
-        exit
+        # currentVersion=$ver
+        print 'Unknown version '$ver', please go to "http://chromedriver.storage.googleapis.com/" download manual.'
     fi
     echo $currentVersion
 }
@@ -147,7 +155,7 @@ installCommand() {
             sudo dpkg -i google-chrome-stable_current_amd64.deb
             sudo apt-get install
             sudo apt-get install -f
-            rm -f google-chrome-stable_current_amd64.deb
+            rm google-chrome-stable_current_amd64.deb
         fi
 
         # install python or not
@@ -182,17 +190,19 @@ getCD() {
 
         # get chrome version
         CDVer=$(getCDVersion)
+        if ! $CDVer; then
+            # get system bits
+            getSystemVersion
+            bits=$?
 
-        # get system bits
-        getSystemVersion
-        bits=$?
-
-        # Get chromedriver
-        chromeURL='http://chromedriver.storage.googleapis.com/'$CDVer'/chromedriver_linux'$bits'.zip' 
-        echo 'Downloading chromedriver form '$chromeURL
-        wget -O chromedriver.zip $chromeURL 
-        unzip chromedriver.zip chromedriver -d '.'
-        chmod +x chromedriver
+            # Get chromedriver
+            chromeURL='http://chromedriver.storage.googleapis.com/'$CDVer'/chromedriver_linux'$bits'.zip' 
+            echo 'Downloading chromedriver form '$chromeURL
+            wget -O chromedriver.zip $chromeURL 
+            unzip chromedriver.zip chromedriver -d '.'
+            chmod +x chromedriver
+            rm chromedriver.zip
+        fi
     fi
 }
 
